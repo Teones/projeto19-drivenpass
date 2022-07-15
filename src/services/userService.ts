@@ -1,12 +1,11 @@
-// import { User } from "@prisma/client";
 import bcrypt from "bcrypt";
-// import jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
+
 import * as userRepository from "../repositories/userRepository.js";
 
 export async function signUp (email: string, password: string) {
-    const existingEmail = await userRepository.findByEmail(email)
-    console.log(existingEmail)
-    if(existingEmail) { throw { type: "conflict", message: "Users must have unique emails" }; };
+    const user = await userRepository.findByEmail(email);
+    if(user) { throw { type: "conflict", message: "Users must have unique emails" }; };
     
     const passwordEncrypt = bcrypt.hashSync(password, 12);
     
@@ -14,6 +13,16 @@ export async function signUp (email: string, password: string) {
     return createuser;
 }
 
-function findByEmail(email: string) {
-    return userRepository.findByEmail(email)
+
+export async function login (email: string, password: string) {
+    const user = await userRepository.findByEmail(email);
+    if(!user) { throw { type: "unauthorized", message: "Incorrect credentials" }; };
+    
+    const authorization = bcrypt.compareSync(password, user.password);
+    if (!authorization) { throw { type: "unauthorized", message: "Incorrect credentials" }; };
+    
+    const userId = user.id
+    const token = jwt.sign({userId}, process.env.JWT_SECRET)
+
+    return token
 }

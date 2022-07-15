@@ -8,11 +8,11 @@ export async function findByEmail(email: string) {
     })
 }
 
-export async function insert(email: string, passwordEncrypt: string) {
+export async function insert(email: string, password: string) {
     return prisma.users.create({
         data: {
             email: email,
-            password: passwordEncrypt
+            password: password
         }
     })
 }
