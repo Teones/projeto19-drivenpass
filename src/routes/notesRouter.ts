@@ -5,7 +5,7 @@ import * as notesMiddlewares from "../middlewares/notesValidate.js"
 
 const notesRouter = Router();
 notesRouter.post("/notes", notesMiddlewares.validateNote, notesController.create);
-notesRouter.get("/notes", notesController.getNotes)
-// userRouter.post("/sign-in", userMiddlewares.validateUser, userController.login);
+notesRouter.get("/notes", notesController.getNotes);
+notesRouter.delete("/notes/:id", notesController.deleteNote);
 
 export default notesRouter;

@@ -2,6 +2,14 @@ import { prisma } from "../config/database.js";
 
 import { CreateNotesData } from "../services/notesServices.js";
 
+export async function findAll (id: number) {
+    return prisma.secureNotes.findMany({
+        where: {
+            userId: id
+        }
+    })
+}
+
 export async function findById (id: number) {
     return prisma.secureNotes.findUnique({
         where: {
@@ -27,6 +35,14 @@ export async function createNote ({title, note, userId}: CreateNotesData) {
             title: title,
             note: note,
             userId: userId
+        }
+    })
+}
+
+export async function deleteNote (id: number) {
+    return prisma.secureNotes.delete({
+        where: {
+            id: id
         }
     })
 }

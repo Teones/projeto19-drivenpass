@@ -22,12 +22,32 @@ export async function create(CreateNotesData: CreateNotesData, token: string) {
     return createNote;
 }
 
-export async function getNotes (noteId: number, token: string) {
-    const authentication = await authenticationUtils.verifyToken(token)
+export async function getNotesById (noteId: number, token: string) {
+    const authentication = await authenticationUtils.verifyToken(token);
 
     const notes = await notesRepository.findById(noteId);
     if(!notes) { throw { type: "not_found", message: "note nonexistent"} };
     if(notes.userId !== authentication.userId) { throw { type: "unauthorized", message: "note belongs to another user" }; }
     
     return notes;
+}
+
+export async function getnotesAll (token: string) {
+    const authentication = await authenticationUtils.verifyToken(token);
+
+    const notes = await notesRepository.findAll(authentication.userId);
+
+    return notes;
+}
+
+export async function deleteNote (noteId: number, token: string) {
+    const authentication = await authenticationUtils.verifyToken(token);
+
+    const notes = await notesRepository.findById(noteId);
+    if(!notes) { throw { type: "not_found", message: "note nonexistent"} };
+    if(notes.userId !== authentication.userId) { throw { type: "unauthorized", message: "note belongs to another user" }; }
+    
+    const deleteNote = await notesRepository.deleteNote(noteId);
+
+    return deleteNote
 }
