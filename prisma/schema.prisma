@@ -14,12 +14,22 @@ model Users {
   id              Int        @id @default(autoincrement())
   email           String     @unique
   password        String
+  sessions        Sessions[]
   cards           Cards[]
   credentials     Crecentials[]
   secureNotes     SecureNotes[]
   wifiPasswords   WifiPasswords[]
 
   @@map("users")
+}
+
+model Sessions {
+  id              Int         @id @default(autoincrement())
+  token           String
+  session         Users       @relation(fields: [userId], references: [id])
+  userId          Int
+
+  @@map("sessions")
 }
 
 model Cards {
@@ -69,6 +79,7 @@ model SecureNotes {
   secureNote      Users       @relation(fields: [userId], references: [id])
   userId          Int
 
+  @@index([id, userId])
   @@unique(fields: [userId, title], name: "titleByUser")
   @@map("secureNotes")
 }

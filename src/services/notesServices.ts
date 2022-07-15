@@ -2,10 +2,13 @@ import { SecureNotes } from "@prisma/client";
 
 import * as notesRepository from "../repositories/notesRepository.js"
 import * as userRepository from "../repositories/userRepository.js"
+import * as authenticationUtils from "../utils/authenticationUtils.js" 
 
 export type CreateNotesData = Omit<SecureNotes, "id">;
 
-export async function create(CreateNotesData: CreateNotesData) {
+export async function create(CreateNotesData: CreateNotesData, token: string) {
+    await authenticationUtils.verifyToken(token)
+
     if(CreateNotesData.title.length > 50) {throw { type: "not_found", message: "title is longer than 50 characters"}};
     if(CreateNotesData.note.length > 1000) {throw { type: "not_found", message: "note is longer than 1000 characters"}};
 
@@ -17,4 +20,14 @@ export async function create(CreateNotesData: CreateNotesData) {
 
     const createNote = await notesRepository.createNote(CreateNotesData);
     return createNote;
+}
+
+export async function getNotes (noteId: number, token: string) {
+    const authentication = await authenticationUtils.verifyToken(token)
+
+    const notes = await notesRepository.findById(noteId);
+    if(!notes) { throw { type: "not_found", message: "note nonexistent"} };
+    if(notes.userId !== authentication.userId) { throw { type: "unauthorized", message: "note belongs to another user" }; }
+    
+    return notes;
 }
