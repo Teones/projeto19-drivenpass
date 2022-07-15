@@ -64,11 +64,12 @@ model Crecentials {
 
 model SecureNotes {
   id              Int         @id @default(autoincrement())
-  title           String      @unique
+  title           String      
   note            String
   secureNote      Users       @relation(fields: [userId], references: [id])
   userId          Int
 
+  @@unique(fields: [userId, title], name: "titleByUser")
   @@map("secureNotes")
 }
 
