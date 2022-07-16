@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 
 import * as services from "../services/cardsServices.js"
-import { CardsData } from "../services/cardsServices";
+import { CardsData } from "../services/cardsServices.js";
 
 export async function create (req: Request, res: Response) {
     const token = req.headers["token"] as string;

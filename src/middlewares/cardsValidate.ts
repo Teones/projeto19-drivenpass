@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 
-import cardsSchema from "../schemas/cardsSchema";
+import cardsSchema from "../schemas/cardsSchema.js";
 
 export function validateCards (req: Request, res: Response, next: NextFunction) {
     const cardData = req.body;

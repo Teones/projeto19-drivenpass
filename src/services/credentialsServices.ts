@@ -10,7 +10,7 @@ export async function create (credential: CreateCredentialData, token: string) {
     const authentication = await authenticationUtils.verifyToken(token);
 
     const title = await repository.findByTitle(credential.title, authentication.userId);
-    if(title) { throw { type: "conflict", message: "Notes must have unique titles" }; };
+    if(title) { throw { type: "conflict", message: "credentials must have unique titles" }; };
 
     // espaço reservado para fazer o cryptr da senha
 
