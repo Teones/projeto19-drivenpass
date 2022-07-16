@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-import { CreateNotesData } from "../services/notesServices";
+import { CreateNotesData } from "../services/notesServices.js";
 
 const notesSchema = Joi.object<CreateNotesData>({
     title: Joi.string().max(50).required(),
