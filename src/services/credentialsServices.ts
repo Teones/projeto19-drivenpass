@@ -23,6 +23,8 @@ export async function getAll (token: string) {
     const authentication = await authenticationUtils.verifyToken(token);
     const credential = await repository.getAll(authentication.userId);
 
+    // descriptografar senha e mapear return
+
     return credential
 }
 
@@ -33,6 +35,8 @@ export async function getById (id: number, token: string) {
     if(!credential) { throw { type: "not_found", message: "credential nonexistent"} };
     if(credential.userId !== authentication.userId) { throw { type: "unauthorized", message: "credential belongs to another user" }; };
  
+    // descriptografar senha e mapear return
+
     return credential;
 }
 

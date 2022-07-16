@@ -34,6 +34,7 @@ model Sessions {
 
 model Cards {
   id              Int         @id @default(autoincrement())
+  title           String
   cardNumber      String      @unique
   cardholderName  String
   securityCode    String
@@ -43,13 +44,14 @@ model Cards {
   card            Users       @relation(fields: [userId], references: [id])
   userId          Int
 
+  @@unique(fields: [userId, title], name: "titleByUser")
   @@map("cards")
 }
 
 enum CardType {
   credit
   debit
-  creditAndDebit
+  ambos
 }
 
 enum CardFlag {
