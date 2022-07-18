@@ -7,8 +7,9 @@ export async function create (req: Request, res: Response) {
     const token = req.headers["token"] as string
     
     const note: CreateNotesData = req.body;
+    console.log(typeof(note.userId))
     if(!note.title || !note.note || !note.userId) { throw { type: "not_found" } };
-    if(typeof(note.userId) === "string") { throw { type: "not_found" } };
+    if(typeof(note.userId) !== "number") { throw { type: "not_found" } };
 
     const create = await notesServices.create(note, token)
 
