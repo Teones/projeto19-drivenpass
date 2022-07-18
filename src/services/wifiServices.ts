@@ -1,9 +1,11 @@
 import { WifiPasswords } from "@prisma/client";
-
-export type WifiData = Omit <WifiPasswords, "id" | "userId">
+import Cryptr from "cryptr";
+const cryptr = new Cryptr(process.env.CRYPTR_PASSWORD);
 
 import * as authenticationUtils from "../utils/authenticationUtils.js"
 import * as repository from "../repositories/wifiRepository.js"
+
+export type WifiData = Omit <WifiPasswords, "id" | "userId">
 
 export async function create(wifi: WifiData, token: string) {
     const authentication = await authenticationUtils.verifyToken(token);
@@ -11,20 +13,37 @@ export async function create(wifi: WifiData, token: string) {
     const title = await repository.getByTitle(wifi.title, authentication.userId);
     if(title) { throw { type: "conflict", message: "Wifi must have unique titles" }; };
 
-    // espaço reservado para fazer o cryptr da senha e código de segurança
+    const encrypt = cryptr.encrypt(wifi.password)
+    const decrypt = cryptr.decrypt(encrypt)
 
-    const create = await repository.create(wifi, authentication.userId);
+    const create = await repository.create(wifi, encrypt, authentication.userId);
 
-    return create;
+    const tranformArray = [create];
+    const createDecrypt = tranformArray.map((wifi) => ({
+        id: wifi.id,
+        title: wifi.title,
+        name: wifi.name,
+        password: decrypt,
+        userId: wifi.userId
+
+    }));
+
+    return createDecrypt[0];
 }
 
 export async function getAll (token: string) {
     const authentication = await authenticationUtils.verifyToken(token);
     const wifi = await repository.getAll(authentication.userId);
 
-    // descriptografar senha e código de segurança e mapear return
+    const object = wifi.map((wifi) => ({
+        id: wifi.id,
+        title: wifi.title,
+        name: wifi.name,
+        password: cryptr.decrypt(wifi.password),
+        userId: wifi.userId
+    }));
 
-    return wifi
+    return object;
 }
 
 export async function getById (id: number, token: string) {
@@ -34,9 +53,16 @@ export async function getById (id: number, token: string) {
     if(!wifi) { throw { type: "not_found", message: "wifi nonexistent"} };
     if(wifi.userId !== authentication.userId) { throw { type: "unauthorized", message: "wifi belongs to another user" }; };
  
-    // descriptografar senha e código de segurança e mapear return
+    const array = [wifi]
+    const object = array.map((wifi) => ({
+        id: wifi.id,
+        title: wifi.title,
+        name: wifi.name,
+        password: cryptr.decrypt(wifi.password),
+        userId: wifi.userId
+    }));
 
-    return wifi;
+    return object[0];
 }
 
 export async function deleteWifi (id: number, token: string) {
@@ -46,7 +72,7 @@ export async function deleteWifi (id: number, token: string) {
     if(!wifi) { throw { type: "not_found", message: "wifi nonexistent"} };
     if(wifi.userId !== authentication.userId) { throw { type: "unauthorized", message: "wifi belongs to another user" }; };
  
-    const deleteWifi = await repository.deleteWifi(id)
+    const deleteWifi = await repository.deleteWifi(id);
 
     return deleteWifi;
 }

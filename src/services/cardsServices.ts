@@ -1,4 +1,6 @@
 import { Cards } from "@prisma/client";
+import Cryptr from "cryptr";
+const cryptr = new Cryptr(process.env.CRYPTR_PASSWORD);
 
 import * as authenticationUtils from "../utils/authenticationUtils.js"
 import * as repository from "../repositories/cardsRepository.js"
@@ -11,20 +13,45 @@ export async function create(card: CardsData, token: string) {
     const title = await repository.getByTitle(card.title, authentication.userId);
     if(title) { throw { type: "conflict", message: "Cards must have unique titles" }; };
 
-    // espaço reservado para fazer o cryptr da senha e código de segurança
+    const encryptCVC = cryptr.encrypt(card.securityCode);
+    const encryptPassword = cryptr.encrypt(card.password);
 
-    const create = await repository.create(card, authentication.userId);
+    const decryptCVC = cryptr.decrypt(encryptCVC);
+    const decryptPassword = cryptr.decrypt(encryptPassword);
 
-    return create;
+    const create = await repository.create(card, encryptCVC, encryptPassword, authentication.userId);
+
+    const tranformArray = [create];
+    const createDecrypt = tranformArray.map((card) => ({
+        id: card.id,
+        cardNumber: card.cardNumber,
+        cardHolderName: card.cardholderName,
+        password: decryptPassword,
+        securityCode: decryptCVC,
+        isVirtual: card.isVirtual,
+        cardType: card.cardType,
+        flag: card.flag
+    }));
+
+    return createDecrypt[0];
 }
 
 export async function getAll (token: string) {
     const authentication = await authenticationUtils.verifyToken(token);
     const card = await repository.getAll(authentication.userId);
 
-    // descriptografar senha e código de segurança e mapear return
+    const object = card.map((card) => ({
+        id: card.id,
+        cardNumber: card.cardNumber,
+        cardHolderName: card.cardholderName,
+        password: cryptr.decrypt(card.password),
+        securityCode: cryptr.decrypt(card.securityCode),
+        isVirtual: card.isVirtual,
+        cardType: card.cardType,
+        flag: card.flag
+    }));
 
-    return card
+    return object;
 }
 
 export async function getById (id: number, token: string) {
@@ -34,9 +61,19 @@ export async function getById (id: number, token: string) {
     if(!card) { throw { type: "not_found", message: "card nonexistent"} };
     if(card.userId !== authentication.userId) { throw { type: "unauthorized", message: "card belongs to another user" }; };
  
-    // descriptografar senha e código de segurança e mapear return
+    const array = [card]
+    const object = array.map((card) => ({
+        id: card.id,
+        cardNumber: card.cardNumber,
+        cardHolderName: card.cardholderName,
+        password: cryptr.decrypt(card.password),
+        securityCode: cryptr.decrypt(card.securityCode),
+        isVirtual: card.isVirtual,
+        cardType: card.cardType,
+        flag: card.flag
+    }));
 
-    return card;
+    return object;
 }
 
 export async function deleteCard (id: number, token: string) {

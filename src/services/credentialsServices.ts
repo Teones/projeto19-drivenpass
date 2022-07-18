@@ -1,5 +1,6 @@
-// import cryptr from "cryptr"
 import { Crecentials } from "@prisma/client";
+import Cryptr from "cryptr";
+const cryptr = new Cryptr(process.env.CRYPTR_PASSWORD);
 
 import * as authenticationUtils from "../utils/authenticationUtils.js" 
 import * as repository from "../repositories/credentialRepository.js"
@@ -12,20 +13,39 @@ export async function create (credential: CreateCredentialData, token: string) {
     const title = await repository.findByTitle(credential.title, authentication.userId);
     if(title) { throw { type: "conflict", message: "credentials must have unique titles" }; };
 
-    // espaço reservado para fazer o cryptr da senha
+    const encrypt = cryptr.encrypt(credential.password)
+    const decrypt = cryptr.decrypt(encrypt)
+    
+    const create = await repository.create(credential, encrypt, authentication.userId);
 
-    const create = await repository.create(credential, authentication.userId);
+    const tranformArray = [create];
+    const createDecrypt = tranformArray.map((credential) => ({
+        id: credential.id,
+        title: credential.title,
+        url: credential.url,
+        login: credential.login,
+        password: decrypt,
+        userId: credential.userId
+    }));
 
-    return create;
+
+    return createDecrypt;
 }
 
 export async function getAll (token: string) {
     const authentication = await authenticationUtils.verifyToken(token);
     const credential = await repository.getAll(authentication.userId);
 
-    // descriptografar senha e mapear return
+    const object = credential.map((credential) => ({
+        id: credential.id,
+        title: credential.title,
+        url: credential.url,
+        login: credential.login,
+        password: cryptr.decrypt(credential.password),
+        userId: credential.userId
+    }));
 
-    return credential
+    return object;
 }
 
 export async function getById (id: number, token: string) {
@@ -35,9 +55,17 @@ export async function getById (id: number, token: string) {
     if(!credential) { throw { type: "not_found", message: "credential nonexistent"} };
     if(credential.userId !== authentication.userId) { throw { type: "unauthorized", message: "credential belongs to another user" }; };
  
-    // descriptografar senha e mapear return
+    const array = [credential]
+    const object = array.map((credential) => ({
+        id: credential.id,
+        title: credential.title,
+        url: credential.url,
+        login: credential.login,
+        password: cryptr.decrypt(credential.password),
+        userId: credential.userId
+    }));
 
-    return credential;
+    return object[0];
 }
 
 export async function deleteCredential (id: number, token: string) {

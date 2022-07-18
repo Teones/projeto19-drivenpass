@@ -29,7 +29,7 @@ export async function getByTitle(title: string, userId: number) {
     })
 }
 
-export async function create ({title ,name, password}: WifiData, userId: number) {
+export async function create ({title ,name}: WifiData, password: string, userId: number) {
     return prisma.wifiPasswords.create({
         data: {
             title,

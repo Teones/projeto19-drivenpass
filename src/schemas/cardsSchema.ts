@@ -8,6 +8,7 @@ const cardsSchema = Joi.object<CardsData>({
     title: Joi.string().required(),
     cardNumber: Joi.string().pattern(/^[0-9]+$/).required(),
     cardholderName: Joi.string().required(),
+    password: Joi.string().min(4).max(4).pattern(/^[0-9]+$/).required(),
     cardType: Joi.string().valid(CardType).required(),
     flag: Joi.string().valid(CardFlag).required(),
     isVirtual: Joi.boolean().required(),

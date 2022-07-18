@@ -14,7 +14,6 @@ model Users {
   id              Int        @id @default(autoincrement())
   email           String     @unique
   password        String
-  sessions        Sessions[]
   cards           Cards[]
   credentials     Crecentials[]
   secureNotes     SecureNotes[]
@@ -23,20 +22,12 @@ model Users {
   @@map("users")
 }
 
-model Sessions {
-  id              Int         @id @default(autoincrement())
-  token           String
-  session         Users       @relation(fields: [userId], references: [id])
-  userId          Int
-
-  @@map("sessions")
-}
-
 model Cards {
   id              Int         @id @default(autoincrement())
   title           String
   cardNumber      String      @unique
   cardholderName  String
+  password        String
   securityCode    String
   isVirtual       Boolean
   cardType        CardType

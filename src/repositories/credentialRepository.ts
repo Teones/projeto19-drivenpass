@@ -29,7 +29,7 @@ export async function findByTitle (title: string, userId: number) {
     })
 }
 
-export async function create ({title, url, login, password}: CreateCredentialData, userId: number) {
+export async function create ({title, url, login}: CreateCredentialData, password: string, userId: number) {
     return prisma.crecentials.create({
         data: {
             title: title,

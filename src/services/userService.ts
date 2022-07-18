@@ -16,7 +16,6 @@ export async function signUp (createUserData: CreateUserData) {
     return createuser;
 }
 
-
 export async function login (createUserData: CreateUserData) {
     const user = await userRepository.findByEmail(createUserData.email);
     if(!user) { throw { type: "unauthorized", message: "Incorrect credentials" }; };

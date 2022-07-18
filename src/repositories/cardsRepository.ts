@@ -30,13 +30,16 @@ export async function getByTitle(title: string, userId: number) {
 }
 
 export async function create ({
-    title ,cardNumber, cardType, cardholderName, flag, isVirtual, securityCode}: CardsData,
+    title ,cardNumber, cardType, cardholderName, flag, isVirtual}: CardsData,
+    securityCode: string,
+    password: string,
     userId: number) {
     return prisma.cards.create({
         data: {
             title,
             cardNumber,
             cardholderName,
+            password,
             cardType, 
             flag,
             isVirtual,
